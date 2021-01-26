@@ -16,131 +16,97 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-# 1.0 Overview
+# (a) Clarity and Aesthetics Evaluation
 
-Correlation coefficient is a popular statistic that use to measure the type and strength of the relationship between two variables.  The values of a correlation coefficient ranges between -1.0 and 1.0.  A correlation coefficient of 1 shows a perfect linear relationship between the two variables, while a -1.0 shows a perfect inverse relationship between the two variables.  A correlation coeficient of 0.0 shows no linear relationship between the two variables. 
+__Critic the graph from both its clarity and aesthetics. At least three from each evaluation criterion.__
 
-When multivariate data are used, the correlation coeficeints of the pair comparisons are displayed in a table form known as correlation matrix or scatterplot matrix.  
+According to Ben Jones, Data Visualisation can be mapped as a single point using clarity and aesthetics as coordinates. The Clarity axis ranges from confusing to clear, whereas the Aesthetics ranges from ugly to beautiful. The style of Data Visualisation can be placed in any of the four quadrants as shown below.
 
-There are three broad reasons for computing a correlation matrix.
+__Why is it not clear?__
 
-- To reveal the relationship between highdimensional variables pairwisely.
-- To input into other analyses. For example, people commonly use correlation matrixes as inputs for exploratory factor analysis, confirmatory factor analysis, structural equation models, and linear regression when excluding missing values pairwise.
-- As a diagnostic when checking other analyses. For example, with linear regression a high amount of correlations suggests that the linear regression’s estimates will be unreliable.
+- As both the X and Y axis are not labelled, the end-user at first glance would not be able to understand the information that the graph is trying to portray. 
+- X axis has 2 categories (age and LFPR) layered upon 2 different LFPR’s for the 2 years.
+- Title is inaccurate; The shown graph states “resident labour force by age” but the actual data is LFPR which measures an economy’s active workforce given using the formula:
+LFPR=  (Labour Force (Employed+Unemployed))/(Labour Force)
+- The lead in verbiage is “percent”, and does not describe the graph well
+- The graph does not show year-on-year trends
+- The graph does not provide a breakdown of the LFPR by gender
+- The age groups provided is unable to demonstrate the dependency ratio.  
+- The chart contains too much information, and there is a lack of a focal point for its centralised message.  
 
-When the data is large, both in terms of the number of observations and the number of variables, [Corrgram](http://www.datavis.ca/papers/corrgram.pdf) tend to be used to visually explore and analyse the structure and the patterns of relations among variables.  It is designed based on two main schemes:
+__Why is it not "beautiful"?
 
-- Rendering the value of a correlation to depict its sign and magnitude, and
-- Reordering the variables in a correlation matrix so that "similar" variables are positioned adjacently, facilitating perception. 
+- Elements in the chart are not aligned. For instance, the source and note are not centralised; 
+- The choice of colour is dull and does not make sense. For example, Title and June 2019 line are of the same colour.
+- Unnecessary information in the chart. For instance, Median Age in (Years) can be shown by using color coordination / representation, but a long phrase was used instead.  
+- No annotation to identify the age where LFPR lines in 2009 and 2019 intersect.
+- Arrow to indicate shift in median age from 2009 to 2019 is not present.
+- The Source of the data is not pertinent to the visualisation and could bear a lighter font as compared to the rest of the image.
 
-In this hands-on exercise, you will learn how to plot data visualisation for visualising correlation matrix with R.  It consists of three main sections.  First, you will learn how to create correlation matrix using [*pairs()*](https://www.rdocumentation.org/packages/graphics/versions/3.6.0/topics/pairs) of R Graphics.  Next, you will learn how to plot corrgram using **corrplot** package of R Lastly, you will learn how to create an interactive correlation matrix using plotly R.   .  
+
+# (b) Proposed Design Sketches
+
+__With reference to the critics above, suggest alternative graphical presentation to improve the current design. Sketch out the proposed design. Support your design by describing the advantages or which part of the issue(s) your alternative design try to overcome.__
+
+## Diverging Population Chart
+
+__Clarity__
+
+- Clearly labelled x and y axis of age and LFPR respectively
+- Only 1 measure (age and LFPR) on each axis
+- Title of “Age-Gender LFPR for <Year>” clearly indicates the information to bring across
+- Graph shows how the genders differ in terms of LFPR across different age groups 
+- Focus of year 2009 and 2019 to compare the differences to avoid cluttering of information
+- Indicate LFPR values
+
+__Aesthetics__
+
+- To use contrasting colors (on the opposite end of the color spectrum) to indicate the difference in gender, and to facilitate comparison of different categories. 
+- Colours are bright and vibrant
+- Remove unnecessary information
 
 
-#  2.0 Installing and Launching R Packages
+## Lollipop Chart
 
-Before you get started, you are required:
+__Clarity__
 
-- to start a new R project, and
-- to create a new R Markdown document.
+- Clearly labelled 2 x and y axis of LFPR, Year and Age respectively
+- Only 1 measure (age and LFPR) on each axis (including top and bottom)
+- Title of “Difference in Mean in 2009 and 2019” clearly indicates the information to bring across
+- Graph would show how the LFPR falls below or above mean (by skewing left or right)
+- Focus of year 2009 and 2019 to compare the differences to avoid cluttering of information
+- LFPR values are indicated in the bubble
 
-Next, you will use the code chunk below to install and launch **corrplot**,  **ggpubr**, **plotly** and **tidyverse** in RStudio.
+__Aesthetics__
 
-```{r, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+- Colours to contrast positive and negative values are on the opposite spectrum to clearly indicate that they are different and to facilitate comparison of different categories
+- To use contrasting colors (on the opposite end of the color spectrum) to indicate the difference in gender, and to facilitate comparison of different categories. 
+- Colours are bright and vibrant
+- Unnecessary information are eliminated 
 
-packages = c('ggpubr', 'tidyverse')
+## Line Chart 
 
-for(p in packages){library
-  if(!require(p, character.only = T)){
-    install.packages(p)
-  }
-  library(p, character.only = T)
-}
+__Clarity__
+-Clearly labelled x and y axis of year and age groups respectively
+-Only 1 measure (age and LFPR) on each axis 
+-Title of “Age Group between 2009 and 2019” clearly indicates the information to bring across
+-Age Groups are binned according to young age, working age and old age to provide better comparison to extract information
+-LFPR values are indicated at each year
+Clearly shows the trend across the year
+
+__Aesthetics__
+- Colours to contrast genders are on the opposite spectrum to clearly indicate that they are different and to facilitate comparison of different categories
+- Colours are bright and vibrant
+- Unnecessary information are eliminated 
+
+
+# (d) Data Viz Preparation
+
+__Provide step-by-step description on how the data visualization was prepared__
+
+## Data
+
+```{r}
+T5_T <- read_csv("T5_T.csv")
+knitr::kable(tidy(T5_T))
 ```
-
-# 3.0 Importing and Preparing The Data Set 
-
-In this hands-on exercise, the [Wine Quality Data Set](https://archive.ics.uci.edu/ml/datasets/wine+quality) of UCI Machine Learning Repository will be used.  The data set consists of 13 variables and 6497 observations.  For the purpose of this exercise, we have combined the red wine and white wine data into one data file.  It is called wine_quality and is in csv file format.  
-
-
-## 3.1 Importing Data
-
-First, let us import the data into R by using *read_csv()*  of **readr** package.  
-
-
-```{r, echo=TRUE, message=FALSE}
-wine <- read_csv("wine_quality.csv")
-```
-
-Notice that beside quality and type, the rest of the variables are numerical and continuous data type. 
-
-
-# 4.0 Univariate EDA with Histogram
-
-In the figure below, multiple histograms are plottted to reveal the distribution of the selected variables in the wine quality data sets.  
-
-```{r, echo=FALSE, message=FALSE, fig.width=12, fig.height=6}
-fa <- ggplot(data=wine, aes(x= `fixed acidity`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-va <- ggplot(data=wine, aes(x= `volatile acidity`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-ca <- ggplot(data=wine, aes(x= `citric acid`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-rs <- ggplot(data=wine, aes(x= `residual sugar`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-ch <- ggplot(data=wine, aes(x= `chlorides`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-fSO2 <- ggplot(data=wine, aes(x= `free sulfur dioxide`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-tSO2 <- ggplot(data=wine, aes(x= `total sulfur dioxide`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-density <- ggplot(data=wine, aes(x= density)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-pH <- ggplot(data=wine, aes(x= pH)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-sulphates <- ggplot(data=wine, aes(x= sulphates)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-alcohol <- ggplot(data=wine, aes(x= alcohol)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-
-ggarrange(fa, va, ca, rs, ch, fSO2, tSO2, density, pH, sulphates, alcohol, 
-          ncol = 4, nrow = 3)
-```
-
-The code chunks used to create the data visualisation consists of two main parts.  First, we will create the individual histograms using the code chunk below.
-
-```{r, echo=TRUE, eval=FALSE, message=FALSE}
-fa <- ggplot(data=wine, aes(x= `fixed acidity`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-va <- ggplot(data=wine, aes(x= `volatile acidity`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-ca <- ggplot(data=wine, aes(x= `citric acid`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-rs <- ggplot(data=wine, aes(x= `residual sugar`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-ch <- ggplot(data=wine, aes(x= `chlorides`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-fSO2 <- ggplot(data=wine, aes(x= `free sulfur dioxide`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-tSO2 <- ggplot(data=wine, aes(x= `total sulfur dioxide`)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-density <- ggplot(data=wine, aes(x= density)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-pH <- ggplot(data=wine, aes(x= pH)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-sulphates <- ggplot(data=wine, aes(x= sulphates)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-alcohol <- ggplot(data=wine, aes(x= alcohol)) +
-  geom_histogram(bins=20, color="black", fill="light blue")
-```
-
-Next, the *ggarrange* function of **ggpur** package is used to group these histograms together.
-
-```{r, echo=TRUE, eval=FALSE, message=FALSE, fig.width=12, fig.height=6}
-ggarrange(fa, va, ca, rs, ch, fSO2, tSO2, density, pH, sulphates, alcohol, 
-          ncol = 4, nrow = 3)
-```
-
-
-#Diagram
-
-
