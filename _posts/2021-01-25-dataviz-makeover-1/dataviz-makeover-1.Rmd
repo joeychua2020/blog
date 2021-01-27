@@ -1,7 +1,6 @@
 ---
 title: "DataViz Makeover 1"
-description: |
-  A short description of the post.
+description: Welcome! 
 author:
   - name: Joey Chua
     url: https://www.linkedin.com/in/joeychuasm/
@@ -9,6 +8,7 @@ date: 01-25-2021
 output:
   distill::distill_article:
     self_contained: false
+mainfont: Calibri 
 ---
 
 
@@ -20,85 +20,45 @@ knitr::opts_chunk$set(echo = FALSE)
 
 __Critic the graph from both its clarity and aesthetics. At least three from each evaluation criterion.__
 
-According to Ben Jones, Data Visualisation can be mapped as a single point using clarity and aesthetics as coordinates. The Clarity axis ranges from confusing to clear, whereas the Aesthetics ranges from ugly to beautiful. The style of Data Visualisation can be placed in any of the four quadrants as shown below.
+The Labour Force in Singapore 2019 Report aims to illustrate the situation of Singapore’s labour force. The information provided by the graph is used by individuals, businesses and policy-makers to understand the various labour transformations in Singapore’s labour market, as well as to formulate policies and programmes. However, the extracted graph does not portray information in a __clear__ and __beautiful__ way. 
+
+![Source: Comprehensive Labour Force Survey, MOM](residentlaborforcebyage.png)
+
+__Clarity and Aesthetics__
+
+According to Ben Jones, Data Visualisation can be mapped as a single point using clarity and aesthetics as coordinates. The __Clarity__ axis ranges from confusing to clear, whereas the __Aesthetics__ ranges from ugly to beautiful. The style of Data Visualisation can be placed in any of the four quadrants as shown below.
+
+![Ben Jones](benjones.png)
 
 __Why is it not clear?__
 
-- As both the X and Y axis are not labelled, the end-user at first glance would not be able to understand the information that the graph is trying to portray. 
-- X axis has 2 categories (age and LFPR) layered upon 2 different LFPR’s for the 2 years.
-- Title is inaccurate; The shown graph states “resident labour force by age” but the actual data is LFPR which measures an economy’s active workforce given using the formula:
-LFPR=  (Labour Force (Employed+Unemployed))/(Labour Force)
-- The lead in verbiage is “percent”, and does not describe the graph well
-- The graph does not show year-on-year trends
-- The graph does not provide a breakdown of the LFPR by gender
-- The age groups provided is unable to demonstrate the dependency ratio.  
-- The chart contains too much information, and there is a lack of a focal point for its centralised message.  
+![](whyisitnotclear.png)
 
-__Why is it not "beautiful"?
+__Why is it not "beautiful"?__
 
-- Elements in the chart are not aligned. For instance, the source and note are not centralised; 
-- The choice of colour is dull and does not make sense. For example, Title and June 2019 line are of the same colour.
-- Unnecessary information in the chart. For instance, Median Age in (Years) can be shown by using color coordination / representation, but a long phrase was used instead.  
-- No annotation to identify the age where LFPR lines in 2009 and 2019 intersect.
-- Arrow to indicate shift in median age from 2009 to 2019 is not present.
-- The Source of the data is not pertinent to the visualisation and could bear a lighter font as compared to the rest of the image.
+![](whyisitnotbeautiful.png)
 
 
 # (b) Proposed Design Sketches
 
 __With reference to the critics above, suggest alternative graphical presentation to improve the current design. Sketch out the proposed design. Support your design by describing the advantages or which part of the issue(s) your alternative design try to overcome.__
 
-## Diverging Population Chart
-
-__Clarity__
-
-- Clearly labelled x and y axis of age and LFPR respectively
-- Only 1 measure (age and LFPR) on each axis
-- Title of “Age-Gender LFPR for <Year>” clearly indicates the information to bring across
-- Graph shows how the genders differ in terms of LFPR across different age groups 
-- Focus of year 2009 and 2019 to compare the differences to avoid cluttering of information
-- Indicate LFPR values
-
-__Aesthetics__
-
-- To use contrasting colors (on the opposite end of the color spectrum) to indicate the difference in gender, and to facilitate comparison of different categories. 
-- Colours are bright and vibrant
-- Remove unnecessary information
-
-
 ## Lollipop Chart
 
-__Clarity__
+![](lollipopchart.png)
+![](lollipoptable.png)
 
-- Clearly labelled 2 x and y axis of LFPR, Year and Age respectively
-- Only 1 measure (age and LFPR) on each axis (including top and bottom)
-- Title of “Difference in Mean in 2009 and 2019” clearly indicates the information to bring across
-- Graph would show how the LFPR falls below or above mean (by skewing left or right)
-- Focus of year 2009 and 2019 to compare the differences to avoid cluttering of information
-- LFPR values are indicated in the bubble
 
-__Aesthetics__
+__OTHER CHARTS ARE FOR EXPLORATORY PURPOSES__
 
-- Colours to contrast positive and negative values are on the opposite spectrum to clearly indicate that they are different and to facilitate comparison of different categories
-- To use contrasting colors (on the opposite end of the color spectrum) to indicate the difference in gender, and to facilitate comparison of different categories. 
-- Colours are bright and vibrant
-- Unnecessary information are eliminated 
+## Diverging Poulation Pyramid Chart
 
-## Line Chart 
+![](populationchart.png)
+![](populationtable.png)
+## Line Chart
 
-__Clarity__
--Clearly labelled x and y axis of year and age groups respectively
--Only 1 measure (age and LFPR) on each axis 
--Title of “Age Group between 2009 and 2019” clearly indicates the information to bring across
--Age Groups are binned according to young age, working age and old age to provide better comparison to extract information
--LFPR values are indicated at each year
-Clearly shows the trend across the year
-
-__Aesthetics__
-- Colours to contrast genders are on the opposite spectrum to clearly indicate that they are different and to facilitate comparison of different categories
-- Colours are bright and vibrant
-- Unnecessary information are eliminated 
-
+![](linechart.png)
+![](linetable.png)
 
 # (d) Data Viz Preparation
 
@@ -106,7 +66,21 @@ __Provide step-by-step description on how the data visualization was prepared__
 
 ## Data
 
-```{r}
-T5_T <- read_csv("T5_T.csv")
-knitr::kable(tidy(T5_T))
-```
+![](step1-2.png)
+![](step3-6.png)
+![](step7-9.png)
+![](step10-11.png)
+![](step12.png)
+![](step13.png)
+![](step14.png)
+![](step15-18.png)
+![](step19-20.png)
+![](step21-23.png)
+
+# (e) Major Observations
+
+__Describe 3 major observations revealed by the data visualization prepared.__
+
+![](lollipopdashboard.png)
+
+![](majorfindings.png)
