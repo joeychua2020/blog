@@ -1,12 +1,14 @@
 ---
 title: "DataViz Makeover 1"
-description: Welcome! 
+description: Assignment 1 
 author:
   - name: Joey Chua
     url: https://www.linkedin.com/in/joeychuasm/
 date: 01-25-2021
 output:
   distill::distill_article:
+    toc: true
+    toc_depth: 6
     self_contained: false
 mainfont: Calibri 
 ---
@@ -20,13 +22,14 @@ knitr::opts_chunk$set(echo = FALSE)
 
 __Critic the graph from both its clarity and aesthetics. At least three from each evaluation criterion.__
 
+
 The Labour Force in Singapore 2019 Report aims to illustrate the situation of Singapore’s labour force. The information provided by the graph is used by individuals, businesses and policy-makers to understand the various labour transformations in Singapore’s labour market, as well as to formulate policies and programmes. However, the extracted graph does not portray information in a __clear__ and __beautiful__ way. 
 
 ![Source: Comprehensive Labour Force Survey, MOM](residentlaborforcebyage.png)
 
 __Clarity and Aesthetics__
 
-According to Ben Jones, Data Visualisation can be mapped as a single point using clarity and aesthetics as coordinates. The __Clarity__ axis ranges from confusing to clear, whereas the __Aesthetics__ ranges from ugly to beautiful. The style of Data Visualisation can be placed in any of the four quadrants as shown below.
+According to Ben Jones, Data Visualisation can be mapped as a single point using clarity and aesthetics as coordinates. The __Clarity__ axis ranges from confusing to clear, whereas the __Aesthetics__ ranges from ugly to beautiful. The style of Data Visualisation can be placed in any of the four quadrants as shown below. The original chart is deemed to be in Quadrant III.
 
 ![Ben Jones](benjones.png)
 
@@ -45,6 +48,8 @@ __With reference to the critics above, suggest alternative graphical presentatio
 
 ## Lollipop Chart
 
+![](sketch.png)
+
 ![](lollipopchart.png)
 ![](lollipoptable.png)
 
@@ -55,6 +60,7 @@ __OTHER CHARTS ARE FOR EXPLORATORY PURPOSES__
 
 ![](populationchart.png)
 ![](populationtable.png)
+
 ## Line Chart
 
 ![](linechart.png)
@@ -63,8 +69,6 @@ __OTHER CHARTS ARE FOR EXPLORATORY PURPOSES__
 # (d) Data Viz Preparation
 
 __Provide step-by-step description on how the data visualization was prepared__
-
-## Data
 
 ![](step1-2.png)
 ![](step3-6.png)
