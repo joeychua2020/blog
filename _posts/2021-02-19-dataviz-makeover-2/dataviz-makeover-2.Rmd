@@ -127,13 +127,20 @@ __Provide step-by-step description on how the data visualization was prepared__
 __Describe 3 major observations revealed by the data visualization prepared.__
 
 
+## Case Study in Singapore to reveal observations
+
+Select Singapore on the Map
+
 ## Across Country Comparison
 
+Select “Question” and “Year” > Select Singapore on the Map
 
+![](casestudy1.png)
 
+The audience can see each country and compare the values to each question based on the distribution. i.e., in addition to the country’s sentiments, it can be compared to other countries using the distribution of squares in the plot. 
 
 ## Within Country Comparison
 
+![](casestudy2.png)
+![](casestudy3.png)
 
-
-## Uncertainty
