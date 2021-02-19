@@ -8,6 +8,8 @@ author:
 date: 02-19-2021
 output:
   distill::distill_article:
+    toc: true
+    toc_depth: 6
     self_contained: false
 ---
 
@@ -45,6 +47,7 @@ __Why is it not clear?__
 __With reference to the critics above, suggest alternative graphical presentation to improve the current design. Sketch out the proposed design. Support your design by describing the advantages or which part of the issue(s) your alternative design try to overcome.__
 
 ![Clarity](proposeddesign.png)
+
 ## World Map
 
 ![](worldmap.png)
@@ -64,7 +67,12 @@ __With reference to the critics above, suggest alternative graphical presentatio
 
 ![](likertchartbenefit.png)
 
-## Erorr Bar
+## Error Bar
+
+![](errorbar.png)
+
+
+![](errorbarbenefits.png)
 
 
 
@@ -122,16 +130,12 @@ __Provide step-by-step description on how the data visualization was prepared__
 
 ![](githubstep1.png)
 
-# Major Observations
+# (e) Major Observations
 
 __Describe 3 major observations revealed by the data visualization prepared.__
 
 
 ## Case Study in Singapore to reveal observations
-
-Select Singapore on the Map
-
-## Across Country Comparison
 
 Select “Question” and “Year” > Select Singapore on the Map
 
@@ -139,8 +143,17 @@ Select “Question” and “Year” > Select Singapore on the Map
 
 The audience can see each country and compare the values to each question based on the distribution. i.e., in addition to the country’s sentiments, it can be compared to other countries using the distribution of squares in the plot. 
 
-## Within Country Comparison
+## Sentiments 
 
 ![](casestudy2.png)
 ![](casestudy3.png)
 
+![](casestudy4.png)
+
+## Indicators
+
+![](casestudy5.png)
+
+![](casestudy6.png)
+![](casestudy7.png)
+![](casestudy8.png)
