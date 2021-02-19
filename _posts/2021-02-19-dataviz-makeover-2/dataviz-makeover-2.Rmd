@@ -157,3 +157,6 @@ The audience can see each country and compare the values to each question based 
 ![](casestudy6.png)
 ![](casestudy7.png)
 ![](casestudy8.png)
+
+
+
