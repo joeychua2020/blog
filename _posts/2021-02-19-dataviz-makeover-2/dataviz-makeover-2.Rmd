@@ -1,7 +1,7 @@
 ---
 title: "DataViz Makeover 2"
 description: |
-  A short description of the post.
+  Assignment 2
 author:
   - name: Joey Chua
     url: https://www.linkedin.com/in/joeychuasm/
@@ -126,7 +126,7 @@ __Provide step-by-step description on how the data visualization was prepared__
 
 ![](tableaustep1.png)
 
-## Github
+## Github and Netlify
 
 ![](githubstep1.png)
 
