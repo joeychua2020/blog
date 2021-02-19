@@ -122,6 +122,7 @@ __Provide step-by-step description on how the data visualization was prepared__
 ![](dashboardstep1.png)
 
 ![](dashboardstep2.png)
+
 ## Tableau Public
 
 ![](tableaustep1.png)
@@ -129,6 +130,10 @@ __Provide step-by-step description on how the data visualization was prepared__
 ## Github and Netlify
 
 ![](githubstep1.png)
+
+![](githubstep2.png)
+
+
 
 # (e) Major Observations
 
