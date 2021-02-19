@@ -70,8 +70,6 @@ __With reference to the critics above, suggest alternative graphical presentatio
 ![](lollipoptable.png)
 
 
-__OTHER CHARTS ARE FOR EXPLORATORY PURPOSES__
-
 ## Diverging Poulation Pyramid Chart
 
 ![](populationchart.png)
