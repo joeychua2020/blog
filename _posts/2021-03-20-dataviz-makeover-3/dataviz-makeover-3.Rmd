@@ -1,7 +1,7 @@
 ---
-title: "dataviz-makeover-3"
+title: "Dataviz Makeover 3"
 description: |
-  A short description of the post.
+  Assignment 3
 author:
   - name: Joey Chua
     url: https://www.linkedin.com/in/joeychuasm/
