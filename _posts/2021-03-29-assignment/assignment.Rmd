@@ -165,9 +165,9 @@ data <- subset(data,host_location=="Singapore" | host_location=="Singapore, Sing
 STOP WORDS
 
 ```{r}
-new_stopwords <- c("michelle's","elizabeth","yuan","felix","anita","susan","eddie","eddie's","edwin","belinda","besan","nargis","antonio","sharm","tim","kathleen","stteven","jerome","freddy","eunice","eunice's","vivian","jerome's","mi's","freddy's","joey","tay","michelle","noor","anthony","tay's","carrie","jauhara","susan","karen","jenny","lena","leonard","kingsley","freda","jialin","matthew","fran")
+new_stopwords <- c("michelle's","elizabeth","yuan","felix","anita","susan","eddie","eddie's","edwin","belinda","besan","nargis","antonio","sharm","tim","kathleen","stteven","jerome","freddy","eunice","eunice's","vivian","jerome's","mi's","freddy's","joey","tay","michelle","noor","anthony","tay's","carrie","jauhara","susan","karen","jenny","lena","leonard","kingsley","freda","jialin","matthew","fran","na")
 
-all_stopwords <- c(new_stopwords,stopwords)
+all_stopwords <- c(new_stopwords,stop_words)
 ```
 
 Unnest tokens
@@ -178,7 +178,7 @@ data_comments <- data %>%
   unnest_tokens(word,comments) %>% 
   group_by(listing_id) %>% 
   ungroup() %>% 
-  anti_join(stopwords)
+  anti_join(stop_words)
 ```
 
 
@@ -189,9 +189,9 @@ data_count <- data_comments %>%
 ```
 
 ```{r echo=TRUE}
-#tidy_wordcloud <- data_count %>% 
-  #wordcloud2()
-#tidy_wordcloud
+tidy_wordcloud <- data_count %>% 
+  wordcloud2()
+tidy_wordcloud
 ```
 
 To make the wordcloud more impactful, the following are taken into considerations:
@@ -243,7 +243,6 @@ bing_sentiments <- data_comments %>%
   acast(word~sentiment,value.var="n",fill=0) %>% 
   comparison.cloud(colors = c("red", "green"))
 
-
 ```
 
 
@@ -257,6 +256,7 @@ bing_count <- data_comments %>%
   ggplot(aes(word,n,fill=sentiment))+
   geom_col()+
   coord_flip()
+bing_count
 ```
 
 -NRC
@@ -281,6 +281,7 @@ nrc_count <- data_comments %>%
   facet_grid(~sentiment)+
   geom_col()+
   coord_flip()
+nrc_count
 ```
 
 **Second method is using tm:**
@@ -288,7 +289,7 @@ nrc_count <- data_comments %>%
 Create corpus
 
 ```{r echo=TRUE}
-corpus_review <- Corpus(VectorSource(data$comments))
+corpus_review <- Corpus(VectorSource(as_tibble(data$comments)))
 ```
 
 Clean corpus 
@@ -298,8 +299,7 @@ corpus_review <- tm_map(corpus_review,tolower)
 corpus_review=tm_map(corpus_review, removePunctuation)
 corpus_review=tm_map(corpus_review, removeWords, stopwords("english"))
 corpus_review=tm_map(corpus_review, removeWords,c("also","is","in","to","with"))
-corpus_review=tm_map(corpus_review,stemDocument)
-corpus_review[[10]][1]
+#corpus_review[[1]][1]
 ```
 
 _Stemming algorithms work by cutting off the end or the beginning of the word, taking into account a list of common prefixes and suffixes that can be found in an inflected word._
@@ -309,31 +309,23 @@ However, the stemming method changes words such as earlier to earli and checking
 _Lemmatization, on the other hand, takes into consideration the morphological analysis of the words._
 
 ```{r echo=TRUE}
-#review_tdm <- TermDocumentMatrix(corpus_review)
-# Convert TDM to matrix
-#review <- as.matrix(review_tdm)
-# Sum rows and frequency data frame
-#review_term_freq <- rowSums(review)
-# Sort term_frequency in descending order
-#review_term_freq <- sort(review, decreasing = T)
-
-
-#Sum rows and frequency data frame
-#review_term_freq_all <- rowSums(all_m)
-#review_word_freq_all <- data.frame(term=names(review_term_freq_all), num = review_term_freq_all)
+review_tdm <- DocumentTermMatrix(corpus_review)
+review <- as.data.frame(colSums(as.matrix(review_tdm)))
+review <- rownames_to_column(review) 
+colnames(review) <- c("term", "num")
+review <- arrange(review, desc(num))
 ```
 
 ```{r echo=TRUE}
-# View the top 10 most common words
-#review_term_freq[1:10]
-#barplot(review_term_freq[1:20], col = "steel blue", las = 2)
-#review_word_freq <- data.frame(term = names(review_term_freq),
-  #num = review_term_freq)
+#View the top 10 most common words
+#review[1:10]
+#barplot(review[1:20], col = "steel blue", las = 2)
 ```
 
+
 ```{r echo=TRUE}  
-#wordcloud(review_word_freq$term, review_word_freq$num,
-  #max.words = 50, colors = "red")
+wordcloud(review$term, review$num,
+  max.words = 50, colors = "red")
 #wordcloud(review_word_freq$term, review_word_freq$num,
   #max.words = 50, colors = c("aquamarine","darkgoldenrod","tomato"))
 ```
@@ -385,9 +377,44 @@ airbnbtfidf %>%
 
 # Topic Modelling (LDA)
 
+```{r}
+airbnb_lda <- LDA(review_tdm, k = 3)
+airbnb_topics <- tidy(airbnb_lda, matrix = "beta")
+```
+
+```{r}
+airbnb_top_terms <- airbnb_topics %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+```
+
+```{r}
+airbnb_top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+```
+
+## Spatial Analysis
+
+```{r}
+region_data <-data_comments %>% 
+  group_by(neighbourhood_group_cleansed) %>% 
+  inner_join(afinn) %>% 
+  count(word,value) %>% 
+  mutate(score=value*n)
+
+subzone_data <- region_data %>% 
+  group_by(neighbourhood_group_cleansed) %>% 
+  summarise(mean_score=mean(score))
+```
+
+
 _Preparing the storyboard for the design of the sub-module._
-
-
 
 
 .
