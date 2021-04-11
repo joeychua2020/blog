@@ -31,7 +31,7 @@ According to [Airbnb](https://news.airbnb.com/2020-update/), Airbnb has millions
 
 This assignment is sub-module of our final Shiny-based Visual Analytics Application (Shiny-VAA). In particular, a focus on text mining utilising various R packages will be presented. The process is shown below: 
 
-# Application Use Case 
+## Application Use Case 
 
 Our application can be used from both the perspective of hosts and guests.
 
@@ -43,9 +43,9 @@ Our application can be used from both the perspective of hosts and guests.
 
 **Guests**: With over 60,000 members and 6,000 properties listed on Airbnb website, a dilemma on which is the right space might be of concern to users. Various modules in our dashboard will allow both types of users to analyse Airbnb data according to their needs. 
 
-# Data 
+## Data 
 
-InsideAirbnb (---------link-----------) provides tools and data for users to explore Airbnb. We will be using the following files:
+[InsideAirbnb](http://insideairbnb.com/get-the-data.html) provides tools and data for users to explore Airbnb. We will be using the following files:
 - listing.csv.gz: This dataset consists of 74 variables and 4256 data points.  
 - reviews.csv.gz: This dataset provides 6 variables and 52368 data points.  
 While the team has decided to use the latest set of data compiled on 27 January 2021, this report uses data compiled on 29 December 2020 for completeness. 
@@ -63,15 +63,22 @@ Zhang (2019) used text mining approaches including content analysis and topic mo
 
 To solve the above gaps, the next section outlines the steps:
 
-# Step by Step 
-
-_Extracting, wrangling and preparing the input data required to perform the analysis. The focus should be on exploring appropriate tidyverse methods_
+# Submodules 
 
 ## Data Preparation
 
+_Extracting, wrangling and preparing the input data required to perform the analysis. The focus should be on exploring appropriate tidyverse methods_
+
+### R Markdown
+
+runtime:shiny was added to allow dynamic documentation.
+{r} part of the code chunk can be used to specify elements and subsequently rendered into different format.
+echo=TRUE is set to allow printing of code chunk when rendered into a different file format.
+More details can be found at [R Markdown Documentation](https://rmarkdown.rstudio.com/lesson-1.html).
+
 ### Packages
 
-```{r}
+```{r echo=TRUE}
 packages <- c("tidyverse","sf","tmap","crosstalk","leaflet","RColorBrewer","ggplot2","rgdal", "rgeos", "raster", "maptools","tmaptools","shiny","tidytext","wordcloud","wordcloud2","tm","ggthemes","igraph","ggmap","DT","reshape2","ggraph","topicmodels","tidytext","topicmodels","quanteda","tm","RColorBrewer","DataExplorer")
 
 for (p in packages){
@@ -82,7 +89,7 @@ for (p in packages){
 }
 ```
 
-### Data Importing 
+### Import Data
 
 Read file and retain necessary columns
 - review file contains 52367 observations with 6 variables;only 2 columns (listing_id and comments) are retained.
@@ -99,11 +106,15 @@ listings <- read_csv("C:/Users/joeyc/blog/_posts/2021-03-29-assignment/listings.
   dplyr::select(-c(listing_url, scrape_id, last_scraped, name, picture_url,host_url, host_about,host_thumbnail_url, host_picture_url, host_listings_count, host_verifications,calendar_updated,first_review,last_review,license,neighborhood_overview,description,host_total_listings_count,host_has_profile_pic,availability_30,availability_60,availability_90,availability_365,calculated_host_listings_count,calculated_host_listings_count_entire_homes,calculated_host_listings_count_private_rooms,calculated_host_listings_count_shared_rooms,reviews_per_month,minimum_nights,maximum_nights,minimum_minimum_nights,maximum_minimum_nights,minimum_maximum_nights,maximum_maximum_nights,number_of_reviews_ltm,number_of_reviews_l30d,minimum_nights_avg_ntm,maximum_nights_avg_ntm,calendar_last_scraped,has_availability,instant_bookable))
 ```
 
+### Merge Data
+
 Merge the listing and review files
 
 ```{r echo=TRUE}
 data <- right_join(reviews,listings,by="listing_id")
 ```
+
+### Save file
 
 Write to CSV for future usage
 
@@ -111,32 +122,57 @@ Write to CSV for future usage
 #write.csv(data,"data.csv")
 ```
 
-View the data
+### View data
 
 ```{r echo=TRUE}
 glimpse(data)
 ```
 
-As glimpse(reviews) does not present the data in a tabular format, datatable and kable packages were considered.
-As datatable does not work well with the extensions of FixedColumns, FixedHeader and Scoller coupled with Shiny, these specific functionalities are excluded.
-Kable is not up to date with the current version of R and was not used.
+glimpse(reviews) does not present the data in a tabular format, datatable and kable packages were considered.
+- datatable does not work well with the extensions of FixedColumns, FixedHeader and Scoller when coupled with Shiny. Hence, these specific functionalities are excluded.
+- kable is not up to date with the current version of R and was not used.
 
-Briefly conduct EDA
+```{r}
+datatable(reviews)
+```
+
+
+## Exploratory Data Analysis (EDA)
+
+EDA is conducted briefly to allow a summary of the data's main characteristics and identify any potential issues that may arise. 
+- [ggplot](https://ggplot2.tidyverse.org/) is commonly used to map variables to aesthetics. However, plotting each graph is tedious thus will not be used.
+- [DataExplorer](https://www.rdocumentation.org/packages/DataExplorer/versions/0.8.2) is similar to ProfilerReport() in Python, which automates data handling and visualisation. This allows more time and focus on understanding the underlying data, as well as to study and extract insights.
+
+To generate a report, run the following code without the hashtag(#)
+
 ```{r echo=TRUE}
 #create_report(data)
 ```
 
+Missing data profile, univariate distribution and bar chart with frequency can be observed.
 
-### Tokenisation, Stop Word Removal, Stemming/Lemmatisation
+![](missingdataprofile.png)
 
-There are two methods to this. 
+![](univariate.png)
 
-#### tidytext
+![](barchart.png)
 
-**First method is using tidytext:**
+## Text Mining
 
-Data Types
-- If  host_since is already in date format, remain unchanged. Else use the following. 
+_Testing and prototyping the proposed sub-module in R Markdown. The R Markdown document must be in full working html report format. This link1 and link2 provides useful examples for your reference._
+
+A Comparison of various packages are shown below: 
+
+![](packagescomparison.png)
+
+### Tidy Text Format 
+
+
+For easier and more effective data handling, this section outline the steps to ensure tidy data i.e. each variable is a column, each observation is a row and each type of observational unit is a table. In other words, tidy text becomes a table with one-token per row. 
+
+
+***Data Types***
+- if  host_since is already in date format, remain unchanged. Else run the code. 
 - listing_id should be categorical
 
 ```{r echo=TRUE}
@@ -144,9 +180,9 @@ data$host_since <- as.Date(data$host_since, format = '%d/%m/%Y')
 data$listing_id <- as.character(data$listing_id)
 ```
 
-Cleaning
-- In comments, Remove anything but alphabets; Change all alphabets to lowercase
-- In price, remove dollar sign
+***Cleaning***
+- for comments, Remove anything but alphabets; Change all alphabets to lowercase
+- in price, remove dollar sign
 - host_response_rate should be numerical
 - remove  \ in amenities
 - remove locations not in normalised singapore text
@@ -162,15 +198,19 @@ data$amenities <- gsub('\"', "", data$amenities, fixed = TRUE)
 data <- subset(data,host_location=="Singapore" | host_location=="Singapore, Singapore" | host_location=="SG")
 ```
 
-STOP WORDS
+**Stop Words**
+Due to the following reasons, additional stop words are added:
+- reviews/comments mentioned names consistently, and they are not relevant to analysis
+- stop_words is not comprehensive enough
 
 ```{r}
 new_stopwords <- c("michelle's","elizabeth","yuan","felix","anita","susan","eddie","eddie's","edwin","belinda","besan","nargis","antonio","sharm","tim","kathleen","stteven","jerome","freddy","eunice","eunice's","vivian","jerome's","mi's","freddy's","joey","tay","michelle","noor","anthony","tay's","carrie","jauhara","susan","karen","jenny","lena","leonard","kingsley","freda","jialin","matthew","fran","na")
-
 all_stopwords <- c(new_stopwords,stop_words)
 ```
 
-Unnest tokens
+**Unnest tokens**
+- unnest_token is used to split a column into tokens such that they are flattened into one-token-per row. 
+- anti_join remove stop words contained in the reviews/comments. 
 
 ```{r echo=TRUE}
 data_comments <- data %>% 
@@ -181,6 +221,8 @@ data_comments <- data %>%
   anti_join(stop_words)
 ```
 
+**Frequency**
+count() or n() can find the most common words that occured in the reviews.
 
 ```{r echo=TRUE}
 data_count <- data_comments %>% 
@@ -188,13 +230,24 @@ data_count <- data_comments %>%
   summarise(frequency=n())
 ```
 
+**Wordcloud**
+Worldcloud provides an easy way to show how frequent a word appears in a corpus. In wordcloud, the size of a word indicates how frequent the word appears in a given text. 
+Costs and benefits of wordcloud:
+
+![](wordcloudproscons.png)
+
+
+- [worldcloud](https://www.rdocumentation.org/packages/wordcloud/versions/2.6) was considered. However, there are limitations in terms of flexibility in usage. Additionally, during renderwordcloud seemed to have issue rendering in shiny.
+- [wordcloud2](https://www.rdocumentation.org/packages/wordcloud2/versions/0.2.1/topics/wordcloud2) provides more flexibility through usage of font, colour, rotations etc. renderwordcloud2 works better for rendering. However, in R Markdown, the rendering issue appeared for any information that follows the wordcloud. 
+
 ```{r echo=TRUE}
 tidy_wordcloud <- data_count %>% 
   wordcloud2()
 tidy_wordcloud
 ```
 
-To make the wordcloud more impactful, the following are taken into considerations:
+For more impactful and better visualisation, the following are taken into considerations:
+
 - colour 
 
 ```{r echo=TRUE}
@@ -208,7 +261,9 @@ To make the wordcloud more impactful, the following are taken into consideration
 #letterCloud(wordcloud,word="AIRBNB")
 ```
 
-- dictionaries
+- dictionaries (afinn, bing, nrc)
+
+**AFINN**
 
 ```{r echo=TRUE}
 afinn <- get_sentiments("afinn") 
@@ -218,7 +273,6 @@ afinn_sentiments <- data_comments %>%
   acast(word~value,value.var="n",fill=0) %>% 
   comparison.cloud()
 ```
-
 
 ```{r echo=TRUE}
 afinn_count <- data_comments %>% 
@@ -231,9 +285,11 @@ afinn_count <- data_comments %>%
   ggplot(aes(word,(n)))+
   geom_col()+
   coord_flip()
+afinn_count
 ```
 
--BING
+
+**BING**
 
 ```{r}
 bing <- get_sentiments("bing")
@@ -241,10 +297,10 @@ bing_sentiments <- data_comments %>%
   inner_join(bing) %>% 
   count(word,sentiment,sort=TRUE) %>% 
   acast(word~sentiment,value.var="n",fill=0) %>% 
-  comparison.cloud(colors = c("red", "green"))
-
+  comparison.cloud(colors = c("red", "blue"))
 ```
 
+_sorry, please self-censor some words_
 
 ```{r echo=TRUE}
 bing_count <- data_comments %>% 
@@ -259,7 +315,7 @@ bing_count <- data_comments %>%
 bing_count
 ```
 
--NRC
+**NRC**
 
 ```{r}
 nrc <- get_sentiments("nrc")
@@ -284,15 +340,19 @@ nrc_count <- data_comments %>%
 nrc_count
 ```
 
-**Second method is using tm:**
 
-Create corpus
+### tm 
+
+**Create corpus**
 
 ```{r echo=TRUE}
 corpus_review <- Corpus(VectorSource(as_tibble(data$comments)))
 ```
 
-Clean corpus 
+**Clean corpus**
+
+- Stemming algorithms work by cutting off the end or the beginning of the word, taking into account a list of common prefixes and suffixes that can be found in an inflected word. However, the stemming method changes words such as earlier to earli and checking to checkin as shown above. As such, this process was excluded.
+- Lemmatization, on the other hand, takes into consideration the morphological analysis of the words.
 
 ```{r echo=TRUE}
 corpus_review <- tm_map(corpus_review,tolower)
@@ -301,12 +361,6 @@ corpus_review=tm_map(corpus_review, removeWords, stopwords("english"))
 corpus_review=tm_map(corpus_review, removeWords,c("also","is","in","to","with"))
 #corpus_review[[1]][1]
 ```
-
-_Stemming algorithms work by cutting off the end or the beginning of the word, taking into account a list of common prefixes and suffixes that can be found in an inflected word._
-
-However, the stemming method changes words such as earlier to earli and checking to checkin as shown above. As such, this process was excluded.
-
-_Lemmatization, on the other hand, takes into consideration the morphological analysis of the words._
 
 ```{r echo=TRUE}
 review_tdm <- DocumentTermMatrix(corpus_review)
@@ -322,26 +376,13 @@ review <- arrange(review, desc(num))
 #barplot(review[1:20], col = "steel blue", las = 2)
 ```
 
-
 ```{r echo=TRUE}  
-wordcloud(review$term, review$num,
-  max.words = 50, colors = "red")
-#wordcloud(review_word_freq$term, review_word_freq$num,
-  #max.words = 50, colors = c("aquamarine","darkgoldenrod","tomato"))
+wordcloud2(review$term, review$num,max.words = 50, colors = "red")
 ```
 
+### TF-IDF
 
-However, the wordcloud has limitations. 
-
-Commanility cloud vs comparison cloud.
-(-----------PROS & CONS TABLE--------------)
-
-
-
-TF-IDF is short for Term Frequency-Inverse Document Frequency. Term Frequency is the number of times word is found within a document. Invest Document Frequency is the inverse number of times word is found in collection of documents. 
-
-
-A word which appears frequently within a document but is not frequently found in collection will have high TF IDF score as this word is relevant to the document. 
+TF-IDF is short for Term Frequency-Inverse Document Frequency. Term Frequency is the number of times word is found within a document. Invest Document Frequency is the inverse number of times word is found in collection of documents. A word which appears frequently within a document but is not frequently found in collection will have high TF IDF score as this word is relevant to the document. 
 
 ```{r}
 review_words <- data_comments %>%
@@ -416,18 +457,28 @@ subzone_data <- region_data %>%
 
 _Preparing the storyboard for the design of the sub-module._
 
+![](datadraft.png)
 
-.
-_Testing and prototyping the proposed sub-module in R Markdown. The R Markdown document must be in full working html report format. This link1 and link2 provides useful examples for your reference._
+![](tokenfrequencydraft.png)
+
+![](dictionarydraft.png)
+
+![](topicmodellingdraft.png)
+
+![](networkanalysisdraft.png)
 
 
+
+# Issue with github
+
+During the process of pushing to github, i face the following error message:
 
 Trouble with github 
-Error in git2r::add(repo, paths) : 
-  Error in 'git2r_index_add_all': the index is locked; this might be due to a concurrent or crashed process
+_Error in git2r::add(repo, paths) : 
+  Error in 'git2r_index_add_all': the index is locked; this might be due to a concurrent or crashed process_
+  
 
-
-# Review
+# Annex
 
 Kiatkawsin, K., Sutherland, I., & Kim, J. (2020). A Comparative Automated Text Analysis of Airbnb Reviews in Hong Kong and Singapore Using Latent Dirichlet Allocation. Sustainability (Basel, Switzerland), 12(16), 6673–. https://doi.org/10.3390/su12166673
 
