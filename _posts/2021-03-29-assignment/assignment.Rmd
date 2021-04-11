@@ -1,0 +1,272 @@
+---
+title: "R Shiny Sub Module"
+description: |
+  Assignment
+author:
+  - name: Joey Chua
+    url: https://www.linkedin.com/in/joeychuasm/
+date: 04-10-2021
+output:
+  distill::distill_article:
+    toc: true
+    toc_depth: 6
+    self_contained: false
+#runtime: shiny
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Introduction 
+
+Airbnb is an online vacation rental marketplace servicing a community of hosts and travellers. The diagram below shows the process of how Airbnb started with two individuals who could not pay for rent in 2007 to starting a company that reached US$10 billion valuation by 2014.In 2020, Airbnb went public with valuation of up to US$47 million. [valuation of up to US$47 million](https://blog.seedly.sg/airbnb-ipo/)
+
+![](airbnbhistory.png)
+[Adapted from Adioma](https://blog.adioma.com/how-airbnb-started-infographic/)
+
+
+According to [Airbnb](https://news.airbnb.com/2020-update/), Airbnb has millions of listings in over 220 counties and regions across 100,000 cities. The data generated provides rich information, including structured data e.g. price and location, as well as unstructured data e.g. reviews and listing descriptions. While there are statistical and analytic tools available to derive insights using these data, these tools are often subscription-based and require technical knowledge, which may not be available or accessible to everyone. Hence, this project aims to develop an interface which is concise, interactive, and user-friendly using R Shiny. With this interface, data-based decisions can be made from the interactive GUI. The R Shiny app will cover exploratory data analysis, confirmatory data analysis, text mining, as well as predictive analysis. 
+
+This assignment is sub-module of our final Shiny-based Visual Analytics Application (Shiny-VAA). In particular, a focus on text mining utilising various R packages will be presented. The process is shown below: 
+
+# Application Use Case 
+
+Our application can be used from both the perspective of hosts and guests.
+
+**Hosts**: In 2014, Airbnb launched the Superhost programme to reward hosts with outstanding hospitality. As a Superhost, one will have better earnings, more visibility, and are able to earn exclusive rewards such as increased earnings compared to regular hosts. To become a Superhost, these are the criteria to be met:
+- 4.8 or higher overall rating based on reviews
+- Completed at least 10 stays in the past year or 100 nights over at least 3 completed stays
+- Less than 1% cancellation rate, not including extenuating circumstances
+- Responds to 90% of new messages within 24 hours 
+
+**Guests**: With over 60,000 members and 6,000 properties listed on Airbnb website, a dilemma on which is the right space might be of concern to users. Various modules in our dashboard will allow both types of users to analyse Airbnb data according to their needs. 
+
+# Data 
+
+InsideAirbnb (---------link-----------) provides tools and data for users to explore Airbnb. We will be using the following files:
+- listing.csv.gz: This dataset consists of 74 variables and 4256 data points.  
+- reviews.csv.gz: This dataset provides 6 variables and 52368 data points.  
+While the team has decided to use the latest set of data compiled on 27 January 2021, this report uses data compiled on 29 December 2020 for completeness. 
+
+# Literature Review
+
+_Conducting literature review on how the analysis were performed before. The focus should be on identifying gaps whereby interactive web approach and visual analytics techniques can be used to enhance user experience on using the analysis techniques._
+
+
+Airbnb data has been widely used for text mining in tools like Python and R. In Python, (Natural Language Processing Toolkit)[https://www.nltk.org/] has easy-to-use interfaces to over 50 corpora and lexical resource, as well as a wide range of text processing libraries for tokenisation, stemming, classification etc. Similarly, R has extensive libraries such as tidyverse and Shiny which allows for text mining and building of interactive dashboards. 
+
+Zhang (2019) used text mining approaches including content analysis and topic modelling (Latent Dirichlet Allocation (LDA) method) to examine over 1 million Airbnb reviews across 50,933 listings in the United States of America (USA). Kiatkawsin, Sutherland & Kim (2020) also used LDA method to compare reviews between Hong Kong and Singapore. However, these articles do not provide visualiation of the methods used and are not interactive. 
+
+[Kim's Shiny Airbnb App](https://donghwikim21.shinyapps.io/ShinyAirbnb/) provided dashboard which is interactive for Exploratory Data Analysis (EDA), but left out reviews. [Ankit Pandey] (https://github.com/ankit2web/Twitter-Sentiment-Analysis-using-R-Shiny-WebApp) provided a more comprehensive text analytics dashboard using wordcloud and polarity of sentiments, but does not provide much interactivity. 
+
+To solve the above gaps, the next section outlines the steps:
+
+# Step by Step 
+
+_Extracting, wrangling and preparing the input data required to perform the analysis. The focus should be on exploring appropriate tidyverse methods_
+
+## Data Preparation
+
+### Packages
+
+```{r}
+packages <- c("tidyverse","sf","tmap","crosstalk","leaflet","RColorBrewer","ggplot2","rgdal", "rgeos", "raster", "maptools","tmaptools","shiny","tidytext","wordcloud","wordcloud2","tm","ggthemes","igraph","ggmap","DT","reshape2","ggraph","topicmodels","tidytext","topicmodels","quanteda","tm","RColorBrewer","DataExplorer")
+
+for (p in packages){
+  if (!require(p,character.only=T)){
+    install.packages(p)
+  }
+  library(p, character.only=T)
+}
+```
+
+### Data Importing 
+
+Read file and retain necessary columns
+- review file contains 52367 observations with 6 variables;only 2 columns (listing_id and comments) are retained.
+- listings file contains 4255 observations with 74 variables; 33 columns are retained.
+
+```{r echo=TRUE}
+reviews <- read_csv("C:/Users/joeyc/blog/_posts/2021-03-29-assignment/reviews.csv")%>% 
+  dplyr::select(listing_id,comments)
+```
+
+```{r echo=TRUE}
+listings <- read_csv("C:/Users/joeyc/blog/_posts/2021-03-29-assignment/listings.csv")  %>% 
+  rename(listing_id=id) %>% 
+  dplyr::select(-c(listing_url, scrape_id, last_scraped, name, picture_url,host_url, host_about,host_thumbnail_url, host_picture_url, host_listings_count, host_verifications,calendar_updated,first_review,last_review,license,neighborhood_overview,description,host_total_listings_count,host_has_profile_pic,availability_30,availability_60,availability_90,availability_365,calculated_host_listings_count,calculated_host_listings_count_entire_homes,calculated_host_listings_count_private_rooms,calculated_host_listings_count_shared_rooms,reviews_per_month,minimum_nights,maximum_nights,minimum_minimum_nights,maximum_minimum_nights,minimum_maximum_nights,maximum_maximum_nights,number_of_reviews_ltm,number_of_reviews_l30d,minimum_nights_avg_ntm,maximum_nights_avg_ntm,calendar_last_scraped,has_availability,instant_bookable))
+```
+
+Merge the listing and review files
+
+```{r echo=TRUE}
+data <- right_join(reviews,listings,by="listing_id")
+```
+
+Write to CSV for future usage
+
+```{r echo=TRUE}
+#write.csv(data,"data.csv")
+```
+
+View the data
+
+```{r echo=TRUE}
+glimpse(data)
+```
+
+As glimpse(reviews) does not present the data in a tabular format, datatable and kable packages were considered.
+As datatable does not work well with the extensions of FixedColumns, FixedHeader and Scoller coupled with Shiny, these specific functionalities are excluded.
+Kable is not up to date with the current version of R and was not used.
+
+Briefly conduct EDA
+```{r echo=TRUE}
+#create_report(data)
+```
+
+
+### Tokenisation, Stop Word Removal, Stemming/Lemmatisation
+
+There are two methods to this. 
+
+#### tidytext
+
+**First method is using tidytext:**
+
+Data Types
+- If  host_since is already in date format, remain unchanged. Else use the following. 
+- listing_id should be categorical
+
+```{r echo=TRUE}
+data$host_since <- as.Date(data$host_since, format = '%d/%m/%Y')
+data$listing_id <- as.character(data$listing_id)
+```
+
+Cleaning
+- In comments, Remove anything but alphabets; Change all alphabets to lowercase
+- In price, remove dollar sign
+- host_response_rate should be numerical
+- remove  \ in amenities
+- remove locations not in normalised singapore text
+- drop rows with missing comments
+
+```{r echo=TRUE}
+data$comments <- gsub("^[alpha:][:space:]'\"]", " ",data$comments) %>% 
+  tolower()
+data$price <- str_remove(string=data$price,pattern='\\$') %>% 
+  as.numeric()
+data$host_response_rate <- gsub("%","",data$host_response_rate) 
+data$amenities <- gsub('\"', "", data$amenities, fixed = TRUE)
+data <- subset(data,host_location=="Singapore" | host_location=="Singapore, Singapore" | host_location=="SG")
+```
+
+Unnest tokens
+
+```{r echo=TRUE}
+data_comments <- data %>% 
+  dplyr::select(listing_id,comments,review_scores_rating,neighbourhood_group_cleansed)%>%
+  unnest_tokens(word,comments) %>% 
+  group_by(listing_id) %>% 
+  ungroup() %>% 
+  anti_join(stop_words)
+```
+
+```{r echo=TRUE}
+data_count <- data_comments %>% 
+  group_by(word) %>% 
+  summarise(frequency=n())
+```
+
+```{r echo=TRUE}
+tidy_wordcloud <- data_count %>% 
+  wordcloud2()
+tidy_wordcloud
+```
+
+
+**Second method is using tm:**
+
+Create corpus
+
+```{r echo=TRUE}
+corpus_review <- Corpus(VectorSource(data$comments))
+```
+
+Clean corpus 
+
+```{r echo=TRUE}
+corpus_review <- tm_map(corpus_review,tolower)
+corpus_review=tm_map(corpus_review, removePunctuation)
+corpus_review=tm_map(corpus_review, removeWords, stopwords("english"))
+corpus_review=tm_map(corpus_review, removeWords,c("also","is","in","to","with"))
+corpus_review=tm_map(corpus_review,stemDocument)
+corpus_review[[10]][1]
+```
+_Stemming algorithms work by cutting off the end or the beginning of the word, taking into account a list of common prefixes and suffixes that can be found in an inflected word._
+
+However, the stemming method changes words such as earlier to earli and checking to checkin as shown above. As such, this process was excluded.
+
+_Lemmatization, on the other hand, takes into consideration the morphological analysis of the words._
+
+```{r echo=TRUE}
+#review_tdm <- TermDocumentMatrix(corpus_review)
+# Convert TDM to matrix
+#review <- as.matrix(review_tdm)
+# Sum rows and frequency data frame
+#review_term_freq <- rowSums(review)
+# Sort term_frequency in descending order
+#review_term_freq <- sort(review, decreasing = T)
+
+
+#Sum rows and frequency data frame
+#review_term_freq_all <- rowSums(all_m)
+#review_word_freq_all <- data.frame(term=names(review_term_freq_all), num = review_term_freq_all)
+```
+
+```{r echo=TRUE}
+# View the top 10 most common words
+#review_term_freq[1:10]
+#barplot(review_term_freq[1:20], col = "steel blue", las = 2)
+#review_word_freq <- data.frame(term = names(review_term_freq),
+  #num = review_term_freq)
+```
+
+```{r echo=TRUE}  
+#wordcloud(review_word_freq$term, review_word_freq$num,
+  #max.words = 50, colors = "red")
+#wordcloud(review_word_freq$term, review_word_freq$num,
+  #max.words = 50, colors = c("aquamarine","darkgoldenrod","tomato"))
+```
+
+
+However, the wordcloud has limitations. 
+
+Commanility cloud vs comparison cloud.
+(-----------PROS & CONS TABLE--------------)
+
+
+_Preparing the storyboard for the design of the sub-module._
+
+
+
+
+
+_Testing and prototyping the proposed sub-module in R Markdown. The R Markdown document must be in full working html report format. This link1 and link2 provides useful examples for your reference._
+
+
+
+Trouble with github 
+Error in git2r::add(repo, paths) : 
+  Error in 'git2r_index_add_all': the index is locked; this might be due to a concurrent or crashed process
+
+
+# Review
+
+Kiatkawsin, K., Sutherland, I., & Kim, J. (2020). A Comparative Automated Text Analysis of Airbnb Reviews in Hong Kong and Singapore Using Latent Dirichlet Allocation. Sustainability (Basel, Switzerland), 12(16), 6673–. https://doi.org/10.3390/su12166673
+
+
+Zhang, J. (2019). What’s yours is mine: exploring customer voice on Airbnb using text-mining approaches. The Journal of Consumer Marketing, 36(5), 655–665. https://doi.org/10.1108/JCM-02-2018-2581
+
+
