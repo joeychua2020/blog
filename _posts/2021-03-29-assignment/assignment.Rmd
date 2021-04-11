@@ -445,17 +445,21 @@ airbnb_top_terms %>%
 shp files are obtained from data.gov
 
 **Data Preparation**
-```{r}
+```{r echo=TRUE}
 region_data <-data_comments %>% 
   group_by(neighbourhood_group_cleansed) %>% 
   inner_join(afinn) %>% 
   count(word,value) %>% 
   mutate(score=value*n)
-
+```
+```{r echo=TRUE}
 subzone_data <- region_data %>% 
   group_by(neighbourhood_group_cleansed) %>% 
   summarise(mean_score=mean(score))
 ```
+
+
+
 
 **Create Map**
 
