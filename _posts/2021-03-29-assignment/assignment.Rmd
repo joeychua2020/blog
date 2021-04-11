@@ -377,7 +377,7 @@ review <- arrange(review, desc(num))
 ```
 
 ```{r echo=TRUE}  
-wordcloud2(review$term, review$num,max.words = 50, colors = "red")
+wordcloud(review$term, review$num,max.words = 50, colors = "red")
 ```
 
 ### TF-IDF
@@ -440,7 +440,9 @@ airbnb_top_terms %>%
   scale_y_reordered()
 ```
 
-## Spatial Analysis
+### Geospatial Analysis
+
+shp files are obtained from data.gov
 
 ```{r}
 region_data <-data_comments %>% 
