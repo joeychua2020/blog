@@ -154,12 +154,20 @@ Cleaning
 
 ```{r echo=TRUE}
 data$comments <- gsub("^[alpha:][:space:]'\"]", " ",data$comments) %>% 
-  tolower()
+  tolower() 
 data$price <- str_remove(string=data$price,pattern='\\$') %>% 
   as.numeric()
 data$host_response_rate <- gsub("%","",data$host_response_rate) 
 data$amenities <- gsub('\"', "", data$amenities, fixed = TRUE)
 data <- subset(data,host_location=="Singapore" | host_location=="Singapore, Singapore" | host_location=="SG")
+```
+
+STOP WORDS
+
+```{r}
+new_stopwords <- c("michelle's","elizabeth","yuan","felix","anita","susan","eddie","eddie's","edwin","belinda","besan","nargis","antonio","sharm","tim","kathleen","stteven","jerome","freddy","eunice","eunice's","vivian","jerome's","mi's","freddy's","joey","tay","michelle","noor","anthony","tay's","carrie","jauhara","susan","karen","jenny","lena","leonard","kingsley","freda","jialin","matthew","fran")
+
+all_stopwords <- c(new_stopwords,stopwords)
 ```
 
 Unnest tokens
@@ -170,8 +178,9 @@ data_comments <- data %>%
   unnest_tokens(word,comments) %>% 
   group_by(listing_id) %>% 
   ungroup() %>% 
-  anti_join(stop_words)
+  anti_join(stopwords)
 ```
+
 
 ```{r echo=TRUE}
 data_count <- data_comments %>% 
@@ -185,6 +194,94 @@ tidy_wordcloud <- data_count %>%
 tidy_wordcloud
 ```
 
+To make the wordcloud more impactful, the following are taken into considerations:
+- colour 
+
+```{r echo=TRUE}
+#custom <- wordcloud2(data_cloud,colorPalette = "RdYlBu")
+```
+
+- shape and letters
+
+```{r echo=TRUE}
+#custom_cloud <- wordcloud2(wordcloud,figPath="airbnb.png")
+#letterCloud(wordcloud,word="AIRBNB")
+```
+
+- dictionaries
+
+```{r echo=TRUE}
+afinn <- get_sentiments("afinn") 
+afinn_sentiments <- data_comments %>% 
+  inner_join(afinn) %>% 
+  count(word,value,sort=TRUE) %>% 
+  acast(word~value,value.var="n",fill=0) %>% 
+  comparison.cloud()
+```
+
+
+```{r echo=TRUE}
+afinn_count <- data_comments %>% 
+  #group_by(listing_id) %>% 
+  inner_join(afinn) %>% 
+  count(word,value) %>% 
+  filter(n>500) %>% 
+  #mutate(n=ifelse(sentiment=="negative",-n,n)) %>% 
+  mutate(word=reorder(word,n)) %>% 
+  ggplot(aes(word,(n)))+
+  geom_col()+
+  coord_flip()
+```
+
+-BING
+
+```{r}
+bing <- get_sentiments("bing")
+bing_sentiments <- data_comments %>% 
+  inner_join(bing) %>% 
+  count(word,sentiment,sort=TRUE) %>% 
+  acast(word~sentiment,value.var="n",fill=0) %>% 
+  comparison.cloud(colors = c("red", "green"))
+
+
+```
+
+
+```{r echo=TRUE}
+bing_count <- data_comments %>% 
+  inner_join(bing) %>% 
+  count(word,sentiment) %>% 
+  filter(n>500) %>% 
+  mutate(n=ifelse(sentiment=="negative",-n,n)) %>% 
+  mutate(word=reorder(word,n)) %>% 
+  ggplot(aes(word,n,fill=sentiment))+
+  geom_col()+
+  coord_flip()
+```
+
+-NRC
+
+```{r}
+nrc <- get_sentiments("nrc")
+nrc_sentiments <- data_comments %>% 
+  inner_join(nrc) %>% 
+  count(word,sentiment,sort=TRUE) %>% 
+  acast(word~sentiment,value.var="n",fill=0) %>% 
+  comparison.cloud()
+```
+
+```{r}
+nrc_count <- data_comments %>% 
+  inner_join(nrc) %>% 
+  count(word,sentiment,sort=TRUE) %>% 
+  filter(n>1500) %>% 
+  mutate(n=ifelse(sentiment=="negative",-n,n)) %>% 
+  mutate(word=reorder(word,n)) %>% 
+  ggplot(aes(word,n))+
+  facet_grid(~sentiment)+
+  geom_col()+
+  coord_flip()
+```
 
 **Second method is using tm:**
 
@@ -204,6 +301,7 @@ corpus_review=tm_map(corpus_review, removeWords,c("also","is","in","to","with"))
 corpus_review=tm_map(corpus_review,stemDocument)
 corpus_review[[10]][1]
 ```
+
 _Stemming algorithms work by cutting off the end or the beginning of the word, taking into account a list of common prefixes and suffixes that can be found in an inflected word._
 
 However, the stemming method changes words such as earlier to earli and checking to checkin as shown above. As such, this process was excluded.
@@ -247,12 +345,52 @@ Commanility cloud vs comparison cloud.
 (-----------PROS & CONS TABLE--------------)
 
 
+
+TF-IDF is short for Term Frequency-Inverse Document Frequency. Term Frequency is the number of times word is found within a document. Invest Document Frequency is the inverse number of times word is found in collection of documents. 
+
+
+A word which appears frequently within a document but is not frequently found in collection will have high TF IDF score as this word is relevant to the document. 
+
+```{r}
+review_words <- data_comments %>%
+  group_by(neighbourhood_group_cleansed ,word) %>% 
+  summarise(frequency=n())
+  #filter(frequency>2000)
+  
+total_words <- review_words %>% 
+  group_by(neighbourhood_group_cleansed) %>% 
+  summarise(total=sum(frequency))
+
+airbnbwords <- left_join(review_words,total_words) %>% 
+  filter(frequency/total<0.01)
+                           
+
+ggplot(airbnbwords,aes(frequency/total,fill=neighbourhood_group_cleansed))+
+  geom_histogram() +
+  facet_wrap(~neighbourhood_group_cleansed,scales="free_y")
+```
+
+```{r}
+airbnbtfidf <- airbnbwords %>% 
+  bind_tf_idf(word,neighbourhood_group_cleansed ,frequency)
+
+airbnbtfidf %>% 
+  group_by(neighbourhood_group_cleansed) %>% 
+  slice_max(tf_idf,n=15) %>% 
+  ungroup() %>% 
+  ggplot(aes(tf_idf,fct_reorder(word,tf_idf),fill=neighbourhood_group_cleansed))+
+  geom_col()+
+  facet_wrap(~neighbourhood_group_cleansed,scales="free")
+```
+
+# Topic Modelling (LDA)
+
 _Preparing the storyboard for the design of the sub-module._
 
 
 
 
-
+.
 _Testing and prototyping the proposed sub-module in R Markdown. The R Markdown document must be in full working html report format. This link1 and link2 provides useful examples for your reference._
 
 
