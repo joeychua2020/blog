@@ -444,6 +444,7 @@ airbnb_top_terms %>%
 
 shp files are obtained from data.gov
 
+**Data Preparation**
 ```{r}
 region_data <-data_comments %>% 
   group_by(neighbourhood_group_cleansed) %>% 
@@ -455,6 +456,9 @@ subzone_data <- region_data %>%
   group_by(neighbourhood_group_cleansed) %>% 
   summarise(mean_score=mean(score))
 ```
+
+**Create Map**
+
 
 
 _Preparing the storyboard for the design of the sub-module._
