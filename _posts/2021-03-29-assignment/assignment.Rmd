@@ -189,9 +189,9 @@ data_count <- data_comments %>%
 ```
 
 ```{r echo=TRUE}
-tidy_wordcloud <- data_count %>% 
-  wordcloud2()
-tidy_wordcloud
+#tidy_wordcloud <- data_count %>% 
+  #wordcloud2()
+#tidy_wordcloud
 ```
 
 To make the wordcloud more impactful, the following are taken into considerations:
