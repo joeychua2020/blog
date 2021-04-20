@@ -479,14 +479,14 @@ datatable(subzone_data)
 ** Read Shape File**
 
 ```{r echo=TRUE}
-mpsz <- st_read(dsn = "master-plan-2014-region-boundary-no-sea", layer = "MP14_SUBZONE_NO_SEA_PL")%>%
-  group_by(PLN_AREA_N) %>%
-  summarise(geometry = sf::st_union(geometry))
+#mpsz <- st_read(dsn = "master-plan-2014-region-boundary-no-sea", layer = #"MP14_SUBZONE_NO_SEA_PL")%>%
+  #group_by(PLN_AREA_N) %>%
+  #summarise(geometry = sf::st_union(geometry))
 ```
 
 **Join Data**
 ```{r echo=TRUE}
-airbnb_clean <- right_join(mpsz,airbnb_data_clean, c("PLN_AREA_N" = "neighbourhood" ))
+#airbnb_clean <- right_join(mpsz,airbnb_data_clean, c("PLN_AREA_N" = "neighbourhood" ))
 ```
 
 # Storyboard
@@ -501,10 +501,106 @@ The shiny app submodule will have tabs for
 - Network Analysis
 - Geospatial Analysis
 
+
+## Install Shiny Packages
+
+```{r echo=TRUE}
+shinypackages <- c("shiny","shinydashboard","DT")
+
+for (p in shinypackages){
+  if (!require(p,character.only=T)){
+    install.packages(p)
+  }
+  library(p, character.only=T)
+}
+```
+
 **Data**
+
 To allow flexibility, shiny application would allow users to upload files for further visualisation. 
 
 ![](datadraft.png)
+```{r echo=TRUE, eval =FALSE}
+# Read in the server data file
+  serverData <- readRDS("serverData.rds")
+
+# Force lower case for later merging / matching
+  serverData <- as.data.frame(lapply(serverData, tolower))
+
+# Shinydashboard app
+  ui <- dashboardPage(
+    dashboardHeader(title = "File Match Example"),
+    dashboardSidebar(width=225,
+      sidebarMenu(
+        menuItem("Sidebar Title", tabName = "dashboard", icon = icon("globe")),
+        hr(),
+        menuItem("File upload merging - Click Me!", tabName = "sDataA", 
+        icon = icon("table")),
+        fileInput('fileUpload', 'Choose file to upload'),
+        hr()
+      )
+    ),
+    dashboardBody(
+      tabItems(
+        tabItem(tabName = "sDataA", icon = icon("dashboard"),
+                h4("File upload matched with other data sources on email field."),
+                fluidRow(DT::dataTableOutput('tblMerged'))
+        )
+      )
+    )
+  )
+
+  server <- function(input, output) {
+# Reactive function to upload the file we will merge / match with our server data
+    contents <- reactive({
+      inputFile <- input$fileUpload
+      if (is.null(inputFile))
+        return()
+      read.csv(inputFile$datapath, header = TRUE)
+    })
+
+# Reactive function joining the input data with the server data
+    mergedData <- reactive({
+      if(is.null(contents()))
+        return()
+    
+# Matching the email address field in our uploaded file with that in our server data 
+    merge(x=contents(),y=serverData,by.x="email",
+          by.y = "serverDataEmail",all.x=TRUE)
+    })
+  
+# Reactive function creating the DT output object
+    output$tblMerged <- DT::renderDataTable({
+    if(is.null(mergedData()))
+      return()
+ 
+    DT::datatable(mergedData(), 
+                  filter = 'top', 
+                  extensions = 'Buttons',
+                  options = list(
+                    dom = 'Blftip',
+                    buttons = 
+                      list('colvis', list(
+                        extend = 'collection',
+                        buttons = list(list(extend='csv',
+                                            filename = 'results'),
+                                       list(extend='excel',
+                                            filename = 'results'),
+                                       list(extend='pdf',
+                                            filename= 'results')),
+                        text = 'Download'
+                      )),
+                    scrollX = TRUE,
+                    pageLength = 5,
+                    lengthMenu = list(c(5, 15, -1), list('5', '15', 'All')),
+                    rownames = FALSE
+                    )
+                  )
+    })
+
+  }
+  shinyApp(ui, server)
+```
 
 ![](tokenfrequencydraft.png)
 
