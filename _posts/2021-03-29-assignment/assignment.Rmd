@@ -416,7 +416,7 @@ airbnbtfidf %>%
   facet_wrap(~neighbourhood_group_cleansed,scales="free")
 ```
 
-# Topic Modelling (LDA)
+### Topic Modelling (LDA)
 
 ```{r}
 airbnb_lda <- LDA(review_tdm, k = 3)
@@ -442,28 +442,38 @@ airbnb_top_terms %>%
 
 ### Geospatial Analysis
 
-shp files are obtained from data.gov
+shp files are obtained from [data.gov region planning](https://data.gov.sg/dataset/region-census-2010) and [region boundary without sea](https://data.gov.sg/dataset/master-plan-2014-region-boundary-no-sea)
 
 **Data Preparation**
+
 ```{r echo=TRUE}
 region_data <-data_comments %>% 
   group_by(neighbourhood_group_cleansed) %>% 
   inner_join(afinn) %>% 
   count(word,value) %>% 
   mutate(score=value*n)
+
+datatable(region_data)
 ```
+
 ```{r echo=TRUE}
 subzone_data <- region_data %>% 
   group_by(neighbourhood_group_cleansed) %>% 
   summarise(mean_score=mean(score))
+
+datatable(subzone_data)
+```
+
+** Read Shape File**
+
+```{r echo=TRUE}
+#mpsz <- st_read(dsn = "subzone-census2020/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL")%>%
+  #group_by(PLN_AREA_N) %>%
+  #summarise(geometry = sf::st_union(geometry))
 ```
 
 
-
-
-**Create Map**
-
-
+# Storyboard
 
 _Preparing the storyboard for the design of the sub-module._
 
