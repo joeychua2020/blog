@@ -430,6 +430,12 @@ airbnbtfidf %>%
 
 ### Topic Modelling (LDA)
 
+Latent Dirichlet allocation is an example of topic modeling algorithm, based on 2 principles: 
+1. Every document is a mixture of topics.For example, document A is 90% topic on location and 10% on host's hospitality. Whereas, document B is 30% topic on location and 70% on host's hospitality.
+2. Every topic is a mixture of words. For instance, based on Airbnb data, one topic can be cleanliness, and the other topic can on amenities. 
+
+To set the number of topics, set k=x where x is a numerical value. 
+
 ```{r}
 airbnb_lda <- LDA(review_tdm, k = 3)
 airbnb_topics <- tidy(airbnb_lda, matrix = "beta")
@@ -451,6 +457,7 @@ airbnb_top_terms %>%
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
 ```
+
 
 ### Geospatial Analysis
 
@@ -517,16 +524,61 @@ for (p in shinypackages){
 }
 ```
 
-**Data**
 
-To allow flexibility, shiny application would allow users to upload files for further visualisation. 
+### Data 
+
+To allow flexibility, shiny application would allow users to upload files for further visualisation. Steps to upload file:
+
+1. Select "Browse.."
+2. Locate and select merged CSV file to be uploaded
+3. After uploading, the variables will be autopopulated
+
+Variables to be shown in datatable can be chosen in 2 ways:
+1. Typing to search for a variable
+2. Scroll and select
+
 
 ![](datatable.png)
 
 ![](datadraft.png)
 
+### Token Frequency
+
+In the second tab, the token frequency would show the word cloud based on the following buttons:
+
+1. Number of words: The slider allows input of single values and ranges.
+
+```{r echo=TRUE, eval=FALSE}
+sliderTextInput(
+   inputId="Id096",
+   label="Choose a range:", 
+   choices=c(1, 10, 100, 500, 1000),
+   grid=TRUE
+)
+```
+
+2. Stopwords: The text input button allows users to decide the stop words they want to add in.
+
+```{r echo=TRUE, eval=FALSE}
+textInput(
+   inputId="Id096",
+   label="Input Text:", 
+   grid=TRUE
+)
+```
+
+3. Theme of Wordcloud: Wordcloud2 has functions for creating wordcloud theme. 
 
 
+```{r echo=TRUE, eval=FALSE}
+tidy_wordcloud+WCtheme(1)
+tidy_wordcloud+WCtheme(2)
+tidy_wordcloud+WCtheme(3)
+tidy_wordcloud+WCtheme(2) + WCtheme(3)
+```
+
+
+4. N-gram (mono, bi, tri)
 
 ![](tokenfrequencydraft.png)
 
